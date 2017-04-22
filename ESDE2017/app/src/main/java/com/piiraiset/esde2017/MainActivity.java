@@ -2,8 +2,12 @@ package com.piiraiset.esde2017;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.ImageButton;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -11,6 +15,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        final ImageButton statusIndicator = (ImageButton)findViewById(R.id.statusIndicator);
+
+        statusIndicator.setOnTouchListener(new View.OnTouchListener()
+        {
+            @Override
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                return changeIndicatorStatus(event, statusIndicator);
+            }
+        });
+    }
+
+    private boolean changeIndicatorStatus(MotionEvent event, ImageButton statusIndicator) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            statusIndicator.setImageResource(R.drawable.receiving);
+        }
+        else if (event.getAction() == MotionEvent.ACTION_UP)
+            statusIndicator.setImageResource(R.drawable.idle);
+        return false;
     }
 
     @Override
