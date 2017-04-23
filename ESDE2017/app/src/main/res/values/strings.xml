@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">ESDE2017</string>
-
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+    <string name="pref_header_general">Preferences</string>
+
+    <string name="pref_uri">Server address</string>
+    <string name="pref_uri_default">127.0.0.1</string>
+
+    <string name="pref_frequency">Default frequency</string>
+    <string name="pref_frequency_default">1337</string>
 </resources>
