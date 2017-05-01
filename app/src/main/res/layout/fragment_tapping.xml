@@ -1,0 +1,16 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context="fi.oulu.tol.esde_2017_017.cwpclient017.TappingFragment"
+android:layout_gravity="center_vertical|center_horizontal"
+android:foregroundGravity="center">
+
+    <ImageButton
+        android:id="@+id/statusIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:background="@android:color/transparent"
+        android:src="@drawable/offline" />
+</FrameLayout>
