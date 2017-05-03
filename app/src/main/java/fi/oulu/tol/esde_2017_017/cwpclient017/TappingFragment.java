@@ -9,11 +9,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
+import java.util.Observable;
 
-public class TappingFragment extends Fragment {
+import fi.oulu.tol.esde_2017_017.cwpclient017.model.CWPModel;
+
+
+public class TappingFragment extends Fragment implements java.util.Observer {
+
+    public ImageButton statusIndicator;
 
     public TappingFragment() {
         // Required empty public constructor
+    }
+
+    public void update(Observable obs, Object obj) {
+        if(obj == CWPModel.CWPState.LineDown) {
+            statusIndicator.setImageResource(R.drawable.receiving);
+        }
+        if(obj == CWPModel.CWPState.LineUp) {
+            statusIndicator.setImageResource(R.drawable.idle);
+        }
     }
 
     @Override
@@ -26,7 +41,7 @@ public class TappingFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View inflatedView = inflater.inflate(R.layout.fragment_tapping, container, false);
-        final ImageButton statusIndicator = (ImageButton)inflatedView.findViewById(R.id.statusIndicator);
+        statusIndicator = (ImageButton)inflatedView.findViewById(R.id.statusIndicator);
 
         statusIndicator.setOnTouchListener(new View.OnTouchListener()
         {
