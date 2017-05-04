@@ -3,6 +3,7 @@ package fi.oulu.tol.esde_2017_017.cwpclient017;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -10,11 +11,12 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 import java.util.Observable;
+import java.util.Observer;
 
 import fi.oulu.tol.esde_2017_017.cwpclient017.model.CWPModel;
 
 
-public class TappingFragment extends Fragment implements java.util.Observer {
+public class TappingFragment extends Fragment implements Observer {
 
     public ImageButton statusIndicator;
 
@@ -22,11 +24,12 @@ public class TappingFragment extends Fragment implements java.util.Observer {
         // Required empty public constructor
     }
 
-    public void update(Observable obs, Object obj) {
-        if(obj == CWPModel.CWPState.LineDown) {
+    @Override
+    public void update(Observable o, Object arg) {
+        if(arg == CWPModel.CWPState.LineDown) {
             statusIndicator.setImageResource(R.drawable.receiving);
         }
-        if(obj == CWPModel.CWPState.LineUp) {
+        if(arg == CWPModel.CWPState.LineUp) {
             statusIndicator.setImageResource(R.drawable.idle);
         }
     }

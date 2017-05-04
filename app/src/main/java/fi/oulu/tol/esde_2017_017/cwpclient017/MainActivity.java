@@ -18,7 +18,10 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWPMessaging;
+import fi.oulu.tol.esde_2017_017.cwpclient017.model.CWPModel;
+
+public class MainActivity extends AppCompatActivity implements CWPProvider{
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -34,12 +37,14 @@ public class MainActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    public CWPModel cwpModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        cwpModel = new CWPModel();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
@@ -59,9 +64,17 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-
     }
 
+    public CWPMessaging getMessaging() {
+        return cwpModel; // cwpModel is the CWPModel member variable in MainActivity.
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        cwpModel = null;  // garbage collector will handle the rest.
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -102,12 +115,11 @@ public class MainActivity extends AppCompatActivity {
             if (position == 0)
                 return new TappingFragment();
             return null;
-            //return PlaceholderFragment.newInstance(position + 1);
         }
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
+            // Show 1 total pages.
             return 1;
         }
 

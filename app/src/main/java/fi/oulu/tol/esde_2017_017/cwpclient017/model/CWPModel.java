@@ -1,5 +1,7 @@
 package fi.oulu.tol.esde_2017_017.cwpclient017.model;
 
+import android.util.Log;
+
 import java.util.Observable;
 import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWPMessaging;
 
