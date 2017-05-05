@@ -3,6 +3,7 @@ package fi.oulu.tol.esde_2017_017.cwpclient017;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -10,15 +11,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
+import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 
+import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWPMessaging;
 import fi.oulu.tol.esde_2017_017.cwpclient017.model.CWPModel;
 
 
 public class TappingFragment extends Fragment implements Observer {
 
     public ImageButton statusIndicator;
+    public CWPMessaging cwpMessaging;
 
     public TappingFragment() {
         // Required empty public constructor
@@ -51,7 +55,7 @@ public class TappingFragment extends Fragment implements Observer {
             @Override
             public boolean onTouch(View v, MotionEvent event)
             {
-                return changeIndicatorStatus(event, statusIndicator);
+                return changeMessagingStatus(event);
             }
         });
         return inflatedView;
@@ -60,19 +64,32 @@ public class TappingFragment extends Fragment implements Observer {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        FragmentActivity activity = getActivity();
+        CWPProvider cwpProvider = (CWPProvider)activity;
+        cwpMessaging = cwpProvider.getMessaging();
+        cwpMessaging.addObserver(this);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+        cwpMessaging.deleteObserver(this);
     }
 
-    private boolean changeIndicatorStatus(MotionEvent event, ImageButton statusIndicator) {
+    private boolean changeMessagingStatus(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            statusIndicator.setImageResource(R.drawable.receiving);
+            try {
+                cwpMessaging.lineDown();
+            } catch (IOException ie) {
+                ie.printStackTrace();
+            }
         }
         else if (event.getAction() == MotionEvent.ACTION_UP)
-            statusIndicator.setImageResource(R.drawable.idle);
+            try {
+                cwpMessaging.lineUp();
+            } catch (IOException ie) {
+                ie.printStackTrace();
+            }
         return false;
     }
 }

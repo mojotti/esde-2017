@@ -11,19 +11,15 @@ public class CWPModel extends Observable implements CWPMessaging {
     private CWPState currentState = CWPState.Connected;
 
     public void lineUp(){
-        if (lineIsUp()) {
-            currentState = CWPState.LineUp;
-            setChanged();
-            notifyObservers(currentState);
-        }
+        currentState = CWPState.LineUp;
+        setChanged();
+        notifyObservers(currentState);
     }
 
     public void lineDown(){
-        if (!lineIsUp()) {
-            currentState = CWPState.LineDown;
-            setChanged();
-            notifyObservers(currentState);
-        }
+        currentState = CWPState.LineDown;
+        setChanged();
+        notifyObservers(currentState);
     }
 
     public boolean lineIsUp() {
