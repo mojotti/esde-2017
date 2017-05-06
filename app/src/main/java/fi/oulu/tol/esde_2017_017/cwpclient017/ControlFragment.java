@@ -42,9 +42,12 @@ public class ControlFragment extends Fragment implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        Toast.makeText(getActivity().getApplicationContext(),
-                getString(R.string.connecting_cwp),
-                Toast.LENGTH_SHORT).show();
+        if (arg == CWPModel.CWPState.Connected || arg == CWPModel.CWPState.Disconnected) {
+            Toast.makeText(getActivity().getApplicationContext(),
+                    arg.toString().substring(0,arg.toString().length()-2) + "ing...",
+                    Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     @Override
@@ -78,17 +81,18 @@ public class ControlFragment extends Fragment implements Observer {
     public void onDetach() {
         super.onDetach();
         cwpControl.deleteObserver(this);
+        cwpControl = null;
     }
 
     private boolean changeConnectionStatus(MotionEvent event) {
-        if (cwpControl != null && event.getAction() == MotionEvent.ACTION_DOWN) {
+        if (!cwpControl.isConnected() && event.getAction() == MotionEvent.ACTION_DOWN) {
             try {
                 cwpControl.connect("Jee", 1, 1);
             } catch (IOException ie) {
                 ie.printStackTrace();
             }
         }
-        else if (cwpControl != null && event.getAction() == MotionEvent.ACTION_UP)
+        else if (cwpControl.isConnected() && event.getAction() == MotionEvent.ACTION_DOWN)
             try {
                 cwpControl.disconnect();
             } catch (IOException ie) {

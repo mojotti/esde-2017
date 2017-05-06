@@ -30,7 +30,7 @@ public class CWPModel extends Observable implements CWPMessaging, CWPControl {
     }
 
     public boolean isConnected(){
-        return true;  // placeholder
+        return currentState == CWPState.Connected;
     }
 
     public void connect(String serverAddr, int serverPort, int frequency) {

@@ -75,6 +75,7 @@ public class TappingFragment extends Fragment implements Observer {
     public void onDetach() {
         super.onDetach();
         cwpMessaging.deleteObserver(this);
+        cwpMessaging = null;
     }
 
     private boolean changeMessagingStatus(MotionEvent event) {
