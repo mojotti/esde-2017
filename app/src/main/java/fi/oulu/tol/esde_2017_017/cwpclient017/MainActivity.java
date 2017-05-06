@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 
+import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWPControl;
 import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWPMessaging;
 import fi.oulu.tol.esde_2017_017.cwpclient017.model.CWPModel;
 
@@ -54,20 +55,14 @@ public class MainActivity extends AppCompatActivity implements CWPProvider{
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
     }
 
     public CWPMessaging getMessaging() {
         return cwpModel; // cwpModel is the CWPModel member variable in MainActivity.
+    }
+
+    public CWPControl getControl() {
+        return cwpModel;
     }
 
     @Override
@@ -114,19 +109,23 @@ public class MainActivity extends AppCompatActivity implements CWPProvider{
             // Return a PlaceholderFragment (defined as a static inner class below).
             if (position == 0)
                 return new TappingFragment();
+            if (position == 1)
+                return new ControlFragment();
             return null;
         }
 
         @Override
         public int getCount() {
-            // Show 1 total pages.
-            return 1;
+            // Show 2 total pages.
+            return 2;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             if (position == 0)
                 return "Tapping";
+            if (position == 1)
+                return "Connection Settings";
             return null;
         }
     }

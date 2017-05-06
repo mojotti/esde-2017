@@ -11,32 +11,28 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 
-import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWPMessaging;
+import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWPControl;
 import fi.oulu.tol.esde_2017_017.cwpclient017.model.CWPModel;
 
 
-public class TappingFragment extends Fragment implements Observer {
+/**
+ * A simple {@link Fragment} subclass.
+ * Activities that contain this fragment must implement the
+ * to handle interaction events.
+ */
+public class ControlFragment extends Fragment implements Observer {
 
-    public ImageButton statusIndicator;
-    public CWPMessaging cwpMessaging;
+    private ToggleButton connectButton;
+    private CWPControl cwpControl;
 
-    public TappingFragment() {
+    public ControlFragment() {
         // Required empty public constructor
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-        if(arg == CWPModel.CWPState.LineDown) {
-            statusIndicator.setImageResource(R.drawable.receiving);
-        }
-        if(arg == CWPModel.CWPState.LineUp) {
-            statusIndicator.setImageResource(R.drawable.idle);
-        }
     }
 
     @Override
@@ -45,18 +41,25 @@ public class TappingFragment extends Fragment implements Observer {
     }
 
     @Override
+    public void update(Observable o, Object arg) {
+        Toast.makeText(getActivity().getApplicationContext(),
+                getString(R.string.connecting_cwp),
+                Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View inflatedView = inflater.inflate(R.layout.fragment_tapping, container, false);
-        statusIndicator = (ImageButton)inflatedView.findViewById(R.id.statusIndicator);
+        View inflatedView = inflater.inflate(R.layout.fragment_control, container, false);
+        connectButton = (ToggleButton) inflatedView.findViewById(R.id.connectButton);
 
-        statusIndicator.setOnTouchListener(new View.OnTouchListener()
+        connectButton.setOnTouchListener(new View.OnTouchListener()
         {
             @Override
             public boolean onTouch(View v, MotionEvent event)
             {
-                return changeMessagingStatus(event);
+                return changeConnectionStatus(event);
             }
         });
         return inflatedView;
@@ -67,27 +70,27 @@ public class TappingFragment extends Fragment implements Observer {
         super.onAttach(context);
         FragmentActivity activity = getActivity();
         CWPProvider cwpProvider = (CWPProvider)activity;
-        cwpMessaging = cwpProvider.getMessaging();
-        cwpMessaging.addObserver(this);
+        cwpControl = cwpProvider.getControl();
+        cwpControl.addObserver(this);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        cwpMessaging.deleteObserver(this);
+        cwpControl.deleteObserver(this);
     }
 
-    private boolean changeMessagingStatus(MotionEvent event) {
-        if (cwpMessaging != null && event.getAction() == MotionEvent.ACTION_DOWN) {
+    private boolean changeConnectionStatus(MotionEvent event) {
+        if (cwpControl != null && event.getAction() == MotionEvent.ACTION_DOWN) {
             try {
-                cwpMessaging.lineDown();
+                cwpControl.connect("Jee", 1, 1);
             } catch (IOException ie) {
                 ie.printStackTrace();
             }
         }
-        else if (cwpMessaging != null && event.getAction() == MotionEvent.ACTION_UP)
+        else if (cwpControl != null && event.getAction() == MotionEvent.ACTION_UP)
             try {
-                cwpMessaging.lineUp();
+                cwpControl.disconnect();
             } catch (IOException ie) {
                 ie.printStackTrace();
             }
