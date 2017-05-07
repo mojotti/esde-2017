@@ -18,6 +18,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWPControl;
+import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWProtocolListener;
 import fi.oulu.tol.esde_2017_017.cwpclient017.model.CWPModel;
 
 
@@ -42,9 +43,9 @@ public class ControlFragment extends Fragment implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        if (arg == CWPModel.CWPState.Connected || arg == CWPModel.CWPState.Disconnected) {
+        if (arg == CWProtocolListener.CWPEvent.EConnected || arg == CWProtocolListener.CWPEvent.EDisconnected) {
             Toast.makeText(getActivity().getApplicationContext(),
-                    arg.toString().substring(0,arg.toString().length()-2) + "ing...",
+                    arg.toString().substring(1,arg.toString().length()-2) + "ing...",
                     Toast.LENGTH_SHORT).show();
         }
 

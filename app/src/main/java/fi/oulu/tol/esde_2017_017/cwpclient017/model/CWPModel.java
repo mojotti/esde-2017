@@ -1,53 +1,54 @@
 package fi.oulu.tol.esde_2017_017.cwpclient017.model;
 
+import java.io.IOException;
 import java.util.Observable;
 
 import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWPControl;
 import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWPMessaging;
+import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWProtocolImplementation;
+import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWProtocolListener;
 
 
-public class CWPModel extends Observable implements CWPMessaging, CWPControl {
-    public enum CWPState { Disconnected, Connected, LineUp, LineDown }
-    private CWPState currentState = CWPState.Disconnected;
+public class CWPModel extends Observable implements CWPMessaging, CWPControl, CWProtocolListener {
+    private CWProtocolImplementation protocol = new CWProtocolImplementation(this);
 
-    private void changeStateAndNotifyObservers(CWPState currentState) {
-        setChanged();
-        notifyObservers(currentState);
+    public void lineUp () throws IOException {
+        if (isConnected())
+            protocol.lineUp();
     }
 
-    public void lineUp(){
-        currentState = CWPState.LineUp;
-        changeStateAndNotifyObservers(currentState);
-    }
-
-    public void lineDown(){
-        currentState = CWPState.LineDown;
-        changeStateAndNotifyObservers(currentState);
+    public void lineDown() throws IOException {
+        if (isConnected())
+            protocol.lineDown();
     }
 
     public boolean lineIsUp() {
-        return true;  // placeholder
+        return protocol.lineIsUp();
     }
 
     public boolean isConnected(){
-        return currentState == CWPState.Connected;
+        return protocol.isConnected();
     }
 
-    public void connect(String serverAddr, int serverPort, int frequency) {
-        currentState = CWPState.Connected;
-        changeStateAndNotifyObservers(currentState);
+    public void connect(String serverAddr, int serverPort, int frequency) throws IOException {
+        protocol.connect(serverAddr, serverPort, frequency);
     }
 
-    public void disconnect() {
-        currentState = CWPState.Disconnected;
-        changeStateAndNotifyObservers(currentState);
+    public void disconnect() throws IOException {
+        if (isConnected())
+            protocol.disconnect();
     }
 
-    public int frequency() {
-        return 0;
+    public int getFrequency() {
+        return protocol.getFrequency();
     }
 
-    public void setFrequency(int frequency) {
-        frequency = CWPControl.DEFAULT_FREQUENCY;
+    public void setFrequency(int frequency) throws IOException {
+        protocol.setFrequency(frequency);
+    }
+
+    public void onEvent(CWProtocolListener.CWPEvent event, int param) {
+        setChanged();
+        notifyObservers(event);
     }
 }

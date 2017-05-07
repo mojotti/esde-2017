@@ -14,5 +14,5 @@ public interface CWPControl {
     public boolean isConnected();
     // Channel management
     public void setFrequency(int frequency) throws IOException;
-    public int frequency();
+    public int getFrequency();
 }

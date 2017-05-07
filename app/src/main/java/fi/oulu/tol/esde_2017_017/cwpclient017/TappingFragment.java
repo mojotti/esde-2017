@@ -17,6 +17,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWPMessaging;
+import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWProtocolListener;
 import fi.oulu.tol.esde_2017_017.cwpclient017.model.CWPModel;
 
 
@@ -31,12 +32,12 @@ public class TappingFragment extends Fragment implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        if(arg == CWPModel.CWPState.LineDown) {
+        if (arg == CWProtocolListener.CWPEvent.ELineUp)
             statusIndicator.setImageResource(R.drawable.receiving);
-        }
-        if(arg == CWPModel.CWPState.LineUp) {
+        else if (arg == CWProtocolListener.CWPEvent.ELineDown)
             statusIndicator.setImageResource(R.drawable.idle);
-        }
+        else if (arg == CWProtocolListener.CWPEvent.EDisconnected)
+            statusIndicator.setImageResource(R.drawable.offline);
     }
 
     @Override
@@ -81,14 +82,14 @@ public class TappingFragment extends Fragment implements Observer {
     private boolean changeMessagingStatus(MotionEvent event) {
         if (cwpMessaging != null && event.getAction() == MotionEvent.ACTION_DOWN) {
             try {
-                cwpMessaging.lineDown();
+                cwpMessaging.lineUp();
             } catch (IOException ie) {
                 ie.printStackTrace();
             }
         }
         else if (cwpMessaging != null && event.getAction() == MotionEvent.ACTION_UP)
             try {
-                cwpMessaging.lineUp();
+                cwpMessaging.lineDown();
             } catch (IOException ie) {
                 ie.printStackTrace();
             }
