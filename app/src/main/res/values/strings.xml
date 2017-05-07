@@ -8,4 +8,17 @@
     <string name="connect">Connect</string>
     <string name="disconnect">Disconnect</string>
     <string name="connecting_cwp">\"Connecting...\"</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_server_address">Server address</string>
+    <string name="pref_default_server_address">127.0.0.1
+    </string>
+
+    <string name="pref_title_frequency">Frequency</string>
+    <string name="pref_default_frequency">0</string>
 </resources>

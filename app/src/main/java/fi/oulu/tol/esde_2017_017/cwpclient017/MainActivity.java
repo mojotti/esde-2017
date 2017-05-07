@@ -1,5 +1,6 @@
 package fi.oulu.tol.esde_2017_017.cwpclient017;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -80,7 +81,8 @@ public class MainActivity extends AppCompatActivity implements CWPProvider {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
         }
 
         return super.onOptionsItemSelected(item);
