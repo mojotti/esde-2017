@@ -146,34 +146,44 @@ public class CWProtocolImplementation implements CWPControl, CWPMessaging, Runna
 
         @Override
         public void run() {
-            int bytesToRead = 4, bytesRead;
             try {
                 doInitialize();
                 byte[] bytes = new byte[BUFFER_LENGTH];
                 ByteBuffer buffer = ByteBuffer.allocate(BUFFER_LENGTH);
                 buffer.order(ByteOrder.BIG_ENDIAN);
                 while(isRunning) {
-                    bytesRead = readLoop(bytes, bytesToRead);
-                    if (bytesRead > 0) {
-                        clearAndPutBytesToBuffer(bytesRead, bytes, buffer);
-                        int serverMessageInt = buffer.getInt();
-                        if (serverMessageInt >= 0) {
-                            changeProtocolState(CWPState.LineUp, serverMessageInt);
-                            bytesToRead = 2;
-                            bytesRead = readLoop(bytes, bytesToRead);
-                            if (bytesRead > 0) {
-                                clearAndPutBytesToBuffer(bytesRead, bytes, buffer);
-                                short serverMessageShort = buffer.getShort();
-                                changeProtocolState(CWPState.LineDown, serverMessageShort);
-                            }
-                        } else if (serverMessageInt != FORBIDDEN_FREQUENCY) {
-                            changeProtocolState(CWPState.LineDown, serverMessageInt);
-                        }
-                    }
+                    handleIncomingMessages(bytes, buffer);  // todo: Figure out why this loops only once. Same issue appeared before refactoring.
                 }
             } catch (IOException e) {
+                Log.d(TAG, "IO Exception received");  // todo: add exception handling.
+            } catch (InterruptedException e) {
+                Log.d(TAG, "Interrupted Exception received");  // todo: add exception handling.
+            }
+        }
 
-            } catch (InterruptedException e) {}
+        private void handleIncomingMessages(byte[] bytes, ByteBuffer buffer) throws IOException, InterruptedException {
+            int bytesRead, bytesToRead = 4;
+            bytesRead = getReadBytes(bytes, bytesToRead);
+            if (bytesRead > 0) {
+                clearAndPutBytesToBuffer(bytesRead, bytes, buffer);
+                int serverMessageInt = buffer.getInt();
+                if (serverMessageInt >= 0) {
+                    receiveLineUpFromServer(bytes, buffer, serverMessageInt);
+                } else if (serverMessageInt != FORBIDDEN_FREQUENCY) {
+                    changeProtocolState(CWPState.LineDown, serverMessageInt);
+                }
+            }
+        }
+
+        private void receiveLineUpFromServer(byte[] bytes, ByteBuffer buffer, int serverMessageInt) throws InterruptedException, IOException {
+            int bytesRead, bytesToRead = 2;
+            changeProtocolState(CWPState.LineUp, serverMessageInt);
+            bytesRead = getReadBytes(bytes, bytesToRead);
+            if (bytesRead > 0) {
+                clearAndPutBytesToBuffer(bytesRead, bytes, buffer);
+                short serverMessageShort = buffer.getShort();
+                changeProtocolState(CWPState.LineDown, serverMessageShort);
+            }
         }
 
         private void clearAndPutBytesToBuffer(int bytesRead, byte[] bytes, ByteBuffer buffer) {
@@ -182,7 +192,7 @@ public class CWProtocolImplementation implements CWPControl, CWPMessaging, Runna
             buffer.position(0);
         }
 
-        private int readLoop(byte [] bytes, int bytesToRead) throws IOException {
+        private int getReadBytes(byte [] bytes, int bytesToRead) throws IOException {
             int bytesRead = 0;
             do {
                 Arrays.fill(bytes, (byte)0);
