@@ -1,10 +1,16 @@
 package fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InterruptedIOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.Observer;
-import java.util.Timer;
-import java.util.TimerTask;
 import android.os.Handler;
 import android.util.Log;
 
@@ -17,6 +23,11 @@ public class CWProtocolImplementation implements CWPControl, CWPMessaging, Runna
     private int messageValue;
     private Handler receiveHandler = new Handler();
     private CWProtocolListener listener = null;
+    private static final int BUFFER_LENGTH = 64;
+    private OutputStream nos = null; //Network Output Stream
+    private ByteBuffer outBuffer = null;
+    private String serverAddr = null;
+    private int serverPort = -1;
 
     public CWProtocolImplementation (CWProtocolListener l) {
         listener = l;
@@ -24,13 +35,19 @@ public class CWProtocolImplementation implements CWPControl, CWPMessaging, Runna
 
     public void addObserver(Observer observer) {}
     public void deleteObserver(Observer observer) {}
-    public void connect(String serverAddr, int serverPort, int frequency) throws IOException {
+    public void connect(String address, int port, int freq) throws IOException {
+        serverAddr = address;
+        serverPort = port;
+        frequency = freq;
         connectionReader = new CWPConnectionReader(this);
         connectionReader.startReading();
         listener.onEvent(CWProtocolListener.CWPEvent.EConnected, 0);
     }
     public void disconnect() throws IOException {
         try {
+            serverAddr = null;
+            serverPort = -1;
+            frequency = DEFAULT_FREQUENCY;
             connectionReader.stopReading();
             connectionReader = null;
             listener.onEvent(CWProtocolListener.CWPEvent.EDisconnected, 0);
@@ -89,10 +106,11 @@ public class CWProtocolImplementation implements CWPControl, CWPMessaging, Runna
         private boolean isRunning = false;
         private Runnable myProcessor = null;
         private static final String TAG = "CWPReader";
-
+        private Socket cwpSocket = null;
+        private InputStream networkInputStream = null; //Network Input Stream
+        private OutputStream networkOutputStream = null;
+        public static final int FORBIDDEN_FREQUENCY = -2147483648;
         // Used before networking for timing cw signals
-        private Timer myTimer = null;
-        private TimerTask myTimerTask = null;
 
         CWPConnectionReader(Runnable processor) {
             myProcessor = processor;
@@ -102,30 +120,21 @@ public class CWProtocolImplementation implements CWPControl, CWPMessaging, Runna
             start();
         }
 
-        void stopReading() throws InterruptedException {
-            myTimer.cancel();
+        void stopReading() throws InterruptedException, IOException {
+            cwpSocket.close();
+            networkOutputStream.close();
+            networkInputStream.close();
+            cwpSocket = null;
             isRunning = false;
-            myTimer = null;
-            myTimerTask = null;
-            currentState = CWPState.Disconnected;
+            changeProtocolState(CWPState.Disconnected, 0);
         }
-        private void doInitialize() throws InterruptedException {
-            currentState = CWPState.Connected;
-            myTimer = new Timer();
-            myTimerTask = new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        if (lineIsUp())
-                            changeProtocolState(CWPState.LineDown, 0);
-                        else
-                            changeProtocolState(CWPState.LineUp, 0);
-                    } catch (InterruptedException e) {
-
-                    }
-                }
-            };
-            myTimer.scheduleAtFixedRate(myTimerTask, 1000, 5000);
+        private void doInitialize() throws InterruptedException, IOException {
+            SocketAddress socketAddress = new InetSocketAddress(serverAddr, serverPort);
+            cwpSocket = new Socket();
+            cwpSocket.connect(socketAddress, 5000);
+            networkInputStream = cwpSocket.getInputStream();
+            networkOutputStream = cwpSocket.getOutputStream();
+            changeProtocolState(CWPState.Connected, 0);
         }
 
         private void changeProtocolState(CWPState state, int param) throws InterruptedException{
@@ -137,17 +146,55 @@ public class CWProtocolImplementation implements CWPControl, CWPMessaging, Runna
 
         @Override
         public void run() {
+            int bytesToRead = 4, bytesRead;
             try {
                 doInitialize();
-                //super.run();
-                changeProtocolState(CWPState.LineDown, 0);
-
+                byte[] bytes = new byte[BUFFER_LENGTH];
+                ByteBuffer buffer = ByteBuffer.allocate(BUFFER_LENGTH);
+                buffer.order(ByteOrder.BIG_ENDIAN);
                 while(isRunning) {
-
+                    bytesRead = readLoop(bytes, bytesToRead);
+                    if (bytesRead > 0) {
+                        clearAndPutBytesToBuffer(bytesRead, bytes, buffer);
+                        int serverMessageInt = buffer.getInt();
+                        if (serverMessageInt >= 0) {
+                            changeProtocolState(CWPState.LineUp, serverMessageInt);
+                            bytesToRead = 2;
+                            bytesRead = readLoop(bytes, bytesToRead);
+                            if (bytesRead > 0) {
+                                clearAndPutBytesToBuffer(bytesRead, bytes, buffer);
+                                short serverMessageShort = buffer.getShort();
+                                changeProtocolState(CWPState.LineDown, serverMessageShort);
+                            }
+                        } else if (serverMessageInt != FORBIDDEN_FREQUENCY) {
+                            changeProtocolState(CWPState.LineDown, serverMessageInt);
+                        }
+                    }
                 }
-            } catch (InterruptedException e) {
+            } catch (IOException e) {
 
-            }
+            } catch (InterruptedException e) {}
+        }
+
+        private void clearAndPutBytesToBuffer(int bytesRead, byte[] bytes, ByteBuffer buffer) {
+            buffer.clear();
+            buffer.put(bytes, 0, bytesRead);
+            buffer.position(0);
+        }
+
+        private int readLoop(byte [] bytes, int bytesToRead) throws IOException {
+            int bytesRead = 0;
+            do {
+                Arrays.fill(bytes, (byte)0);
+                int readNow = networkInputStream.read(bytes, bytesRead, bytesToRead - bytesRead);
+                Log.d(TAG, "Byte count read " + readNow);
+                if (readNow == -1){
+                    throw new IOException("Read -1 from server");
+                } else {
+                    bytesRead += readNow;
+                }
+            } while (bytesRead < bytesToRead);
+            return bytesRead;
         }
     }
 }

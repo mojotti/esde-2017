@@ -1,7 +1,9 @@
 package fi.oulu.tol.esde_2017_017.cwpclient017;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -88,7 +90,15 @@ public class ControlFragment extends Fragment implements Observer {
     private boolean changeConnectionStatus(MotionEvent event) {
         if (!cwpControl.isConnected() && event.getAction() == MotionEvent.ACTION_DOWN) {
             try {
-                cwpControl.connect("Jee", 1, 1);
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+                String[] addressAndPort = prefs.getString("server_address", "").split(":");
+                if (addressAndPort.length == 2) {
+                    String address = addressAndPort[0];
+                    int port = Integer.valueOf(addressAndPort[1]);
+                    cwpControl.connect(address, port, CWPControl.DEFAULT_FREQUENCY);
+                } else {
+                    //???
+                }
             } catch (IOException ie) {
                 ie.printStackTrace();
             }

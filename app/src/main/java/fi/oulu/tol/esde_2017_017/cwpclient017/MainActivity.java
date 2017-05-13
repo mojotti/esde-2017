@@ -1,6 +1,7 @@
 package fi.oulu.tol.esde_2017_017.cwpclient017;
 
 import android.content.Intent;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -49,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements CWPProvider {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
     }
 
     public CWPMessaging getMessaging() {

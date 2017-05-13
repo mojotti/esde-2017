@@ -16,7 +16,7 @@
     <string name="pref_header_general">General</string>
 
     <string name="pref_title_server_address">Server address</string>
-    <string name="pref_default_server_address">127.0.0.1
+    <string name="pref_default_server_address">cwp.opimobi.com:20000
     </string>
 
     <string name="pref_title_frequency">Frequency</string>
