@@ -1,6 +1,7 @@
 package fi.oulu.tol.esde_2017_017.cwpclient017;
 
 import android.content.Intent;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -39,6 +40,10 @@ public class MainActivity extends AppCompatActivity implements CWPProvider {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (android.os.Build.VERSION.SDK_INT > 9) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+        }
 
         cwpModel = new CWPModel();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

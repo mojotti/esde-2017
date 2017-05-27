@@ -89,7 +89,6 @@ public class CWProtocolImplementation implements CWPControl, CWPMessaging, Runna
             lock.acquire();
             if(!isLineUpByUser && (currentState == CWPState.LineUp || currentState == CWPState.LineDown)) {
                 lineUpTimeStamp = (int)System.currentTimeMillis() - sessionInitTime;
-                currentState = CWPState.LineUp;
                 sendMessage(lineUpTimeStamp);
                 if (currentState == CWPState.LineDown && !isLineUpFromServer) {
                     currentState = CWPState.LineUp;
@@ -214,9 +213,11 @@ public class CWProtocolImplementation implements CWPControl, CWPMessaging, Runna
                 isLineUpFromServer = true;
                 if (!isLineUpByUser) {
                     currentState = nextState;
+                    lock.release();
                     listener.onEvent(CWProtocolListener.CWPEvent.ELineUp, tempMessageValue);
+                } else {
+                    lock.release();
                 }
-                lock.release();
                 break;
             case LineDown:
                 if (currentState == CWPState.Connected) {
@@ -236,9 +237,11 @@ public class CWProtocolImplementation implements CWPControl, CWPMessaging, Runna
                     isLineUpFromServer = false;
                     if (!isLineUpByUser) {
                         currentState = nextState;
+                        lock.release();
                         listener.onEvent(CWProtocolListener.CWPEvent.ELineDown, tempMessageValue);
+                    } else {
+                        lock.release();
                     }
-                    lock.release();
                 }
                 break;
         }
@@ -281,6 +284,7 @@ public class CWProtocolImplementation implements CWPControl, CWPMessaging, Runna
 
         private void changeProtocolState(CWPState state, int param) throws InterruptedException{
             Log.d(TAG, "Change protocol state to: " +  state);
+            lock.acquire();
             nextState = state;
             messageValue = param;
             receiveHandler.post(myProcessor);
