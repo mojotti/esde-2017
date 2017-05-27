@@ -11,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -33,6 +35,8 @@ public class ControlFragment extends Fragment implements Observer {
 
     private ToggleButton connectButton;
     private CWPControl cwpControl;
+    private Button frequencyButton;
+    private EditText frequencyText;
 
     public ControlFragment() {
         // Required empty public constructor
@@ -59,6 +63,8 @@ public class ControlFragment extends Fragment implements Observer {
         // Inflate the layout for this fragment
         View inflatedView = inflater.inflate(R.layout.fragment_control, container, false);
         connectButton = (ToggleButton) inflatedView.findViewById(R.id.connectButton);
+        frequencyButton = (Button) inflatedView.findViewById(R.id.changeFreqButton);
+        frequencyText = (EditText) inflatedView.findViewById(R.id.frequencyText);
 
         connectButton.setOnTouchListener(new View.OnTouchListener()
         {
@@ -66,6 +72,14 @@ public class ControlFragment extends Fragment implements Observer {
             public boolean onTouch(View v, MotionEvent event)
             {
                 return changeConnectionStatus(event);
+            }
+        });
+        frequencyButton.setOnTouchListener(new View.OnTouchListener()
+        {
+            @Override
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                return changeFrequency(event);
             }
         });
         return inflatedView;
@@ -111,4 +125,23 @@ public class ControlFragment extends Fragment implements Observer {
             }
         return false;
     }
+
+    private boolean changeFrequency(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            int new_frequency = Integer.parseInt(frequencyText.getText().toString());
+            if (new_frequency != cwpControl.getFrequency()) {
+                try {
+                    cwpControl.setFrequency(new_frequency);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            final SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+            SharedPreferences.Editor edit = sharedPref.edit();
+            edit.putString("frequency", Integer.toString(new_frequency));
+            edit.commit();
+        }
+        return false;
+    }
+
 }

@@ -32,9 +32,9 @@ public class TappingFragment extends Fragment implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        if (arg == CWProtocolListener.CWPEvent.ELineUp)
+        if (arg == CWProtocolListener.CWPEvent.ELineUp) // TODO: fix this. use Message class instead
             statusIndicator.setImageResource(R.drawable.receiving);
-        else if (arg == CWProtocolListener.CWPEvent.ELineDown)
+        else if (arg == CWProtocolListener.CWPEvent.ELineDown || arg == CWProtocolListener.CWPEvent.EConnected)
             statusIndicator.setImageResource(R.drawable.idle);
         else if (arg == CWProtocolListener.CWPEvent.EDisconnected)
             statusIndicator.setImageResource(R.drawable.offline);
@@ -84,6 +84,9 @@ public class TappingFragment extends Fragment implements Observer {
             try {
                 cwpMessaging.lineUp();
             } catch (IOException ie) {
+                Toast.makeText(getActivity().getApplicationContext(),
+                        "Could not send message to server: " + ie.getLocalizedMessage(),
+                        Toast.LENGTH_LONG).show();
                 ie.printStackTrace();
             }
         }
@@ -91,6 +94,9 @@ public class TappingFragment extends Fragment implements Observer {
             try {
                 cwpMessaging.lineDown();
             } catch (IOException ie) {
+                Toast.makeText(getActivity().getApplicationContext(),
+                        "Could not send message to server: " + ie.getLocalizedMessage(),
+                        Toast.LENGTH_LONG).show();
                 ie.printStackTrace();
             }
         return false;

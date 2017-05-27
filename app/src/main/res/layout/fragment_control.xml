@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="fi.oulu.tol.esde_2017_017.cwpclient017.ControlFragment">
 
     <ToggleButton
@@ -9,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:layout_gravity="center_vertical"
+        android:layout_marginTop="50dp"
         android:layout_marginLeft="50dp"
         android:layout_marginRight="50dp"
         android:textOff="@string/connect"
@@ -17,4 +19,35 @@
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:fontFamily="sans-serif"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="70dp"
+        android:layout_marginTop="30dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pref_title_frequency"
+            android:textSize="20sp"/>
+
+        <EditText
+            android:id="@+id/frequencyText"
+            android:layout_width="136dp"
+            android:layout_height="wrap_content"
+            android:inputType="number" />
+
+        <Button
+            android:id="@+id/changeFreqButton"
+            android:layout_width="73dp"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:fontFamily="sans-serif"
+            android:text="@string/change"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+    </LinearLayout>
 </LinearLayout>
