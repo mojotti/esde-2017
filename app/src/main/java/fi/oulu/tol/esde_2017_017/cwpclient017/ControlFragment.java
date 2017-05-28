@@ -37,6 +37,7 @@ public class ControlFragment extends Fragment implements Observer {
     private CWPControl cwpControl;
     private Button frequencyButton;
     private EditText frequencyText;
+    private String currentFrequency;
 
     public ControlFragment() {
         // Required empty public constructor
@@ -66,6 +67,9 @@ public class ControlFragment extends Fragment implements Observer {
                     return changeFrequency(event);
                 }
             });
+            SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+            currentFrequency = (shared.getString("frequency", ""));
+            frequencyText.setText(currentFrequency);
         }
     }
 
@@ -149,6 +153,7 @@ public class ControlFragment extends Fragment implements Observer {
             SharedPreferences.Editor edit = sharedPref.edit();
             edit.putString("frequency", Integer.toString(new_frequency));
             edit.commit();
+            frequencyText.setText(Integer.toString(new_frequency));
         }
         return false;
     }
