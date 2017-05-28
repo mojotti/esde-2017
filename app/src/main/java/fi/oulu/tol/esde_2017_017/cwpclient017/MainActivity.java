@@ -1,6 +1,10 @@
 package fi.oulu.tol.esde_2017_017.cwpclient017;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -16,7 +20,6 @@ import android.view.MenuItem;
 
 import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWPControl;
 import fi.oulu.tol.esde_2017_017.cwpclient017.cwprotocol.CWPMessaging;
-import fi.oulu.tol.esde_2017_017.cwpclient017.model.CWPModel;
 
 public class MainActivity extends AppCompatActivity implements CWPProvider {
 
@@ -34,18 +37,28 @@ public class MainActivity extends AppCompatActivity implements CWPProvider {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
-    public CWPModel cwpModel;
+
+    private boolean cwpBound;
+    private CWPService cwpService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //FIXME?
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
 
-        cwpModel = new CWPModel();
+        Intent serviceIntent = new Intent(this, CWPService.class);
+        ComponentName startServiceRespoonse = startService(serviceIntent);
+        //if (startServiceRespoonse.) { //FIXME check if service started
+
+        //}
+
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
@@ -59,18 +72,27 @@ public class MainActivity extends AppCompatActivity implements CWPProvider {
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
     }
 
-    public CWPMessaging getMessaging() {
-        return cwpModel; // cwpModel is the CWPModel member variable in MainActivity.
+    @Override
+    public void onStart() {
+        super.onStart();
+        Intent intent = new Intent(this, CWPService.class);
+        bindService(intent, cwpConnection, Context.BIND_AUTO_CREATE);
     }
 
-    public CWPControl getControl() {
-        return cwpModel;
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (cwpBound) {
+            cwpService.stopUsing();
+            unbindService(cwpConnection);
+            cwpBound = false;
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        cwpModel = null;  // garbage collector will handle the rest.
+        cwpService = null;  // garbage collector will handle the rest.
     }
 
     @Override
@@ -96,11 +118,21 @@ public class MainActivity extends AppCompatActivity implements CWPProvider {
         return super.onOptionsItemSelected(item);
     }
 
+    public CWPMessaging getMessaging() {
+        return (cwpService != null) ? cwpService.getMessaging() : null;
+    }
+
+    public CWPControl getControl() {
+        return (cwpService != null) ? cwpService.getControl() : null;
+    }
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
+        private TappingFragment tapper = null;
+        private ControlFragment control = null;
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -108,12 +140,18 @@ public class MainActivity extends AppCompatActivity implements CWPProvider {
 
         @Override
         public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            if (position == 0)
-                return new TappingFragment();
-            if (position == 1)
-                return new ControlFragment();
+            if (position == 0) {
+                if (tapper == null) {
+                    tapper = new TappingFragment();
+                }
+                return tapper;
+            }
+            if (position == 1) {
+                if (control == null) {
+                    control = new ControlFragment();
+                }
+                return control;
+            }
             return null;
         }
 
@@ -132,4 +170,28 @@ public class MainActivity extends AppCompatActivity implements CWPProvider {
             return null;
         }
     }
+
+    private ServiceConnection cwpConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            CWPService.CWPBinder binder = (CWPService.CWPBinder) service;
+            cwpService = binder.getService();
+            cwpService.startUsing();
+            cwpBound = true;
+
+            Fragment tFragment = mSectionsPagerAdapter.getItem(0);
+            if (tFragment != null) {
+                ((TappingFragment)tFragment).setMessaging(cwpService.getMessaging());
+            }
+            Fragment cFragment = mSectionsPagerAdapter.getItem(1);
+            if (cFragment != null) {
+                ((ControlFragment)cFragment).setControl(cwpService.getControl());
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            cwpBound = false;
+        }
+    };
 }

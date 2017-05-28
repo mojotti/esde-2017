@@ -38,7 +38,8 @@
             android:id="@+id/frequencyText"
             android:layout_width="136dp"
             android:layout_height="wrap_content"
-            android:inputType="number" />
+            android:inputType="number"
+            android:key="frequency"/>
 
         <Button
             android:id="@+id/changeFreqButton"

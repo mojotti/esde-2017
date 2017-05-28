@@ -42,6 +42,33 @@ public class ControlFragment extends Fragment implements Observer {
         // Required empty public constructor
     }
 
+    public void setControl (CWPControl control) {
+        cwpControl = control;
+        control.addObserver(this);
+        updateView(getView());
+    }
+
+    public void updateView(View view) {
+        if (view != null && cwpControl != null) {
+            connectButton = (ToggleButton) view.findViewById(R.id.connectButton);
+            connectButton.setChecked(cwpControl.isConnected());
+            frequencyButton = (Button) view.findViewById(R.id.changeFreqButton);
+            frequencyText = (EditText) view.findViewById(R.id.frequencyText);
+            connectButton.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return changeConnectionStatus(event);
+                }
+            });
+            frequencyButton.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return changeFrequency(event);
+                }
+            });
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,55 +81,37 @@ public class ControlFragment extends Fragment implements Observer {
                     arg.toString().substring(1,arg.toString().length()-2) + "ing...",
                     Toast.LENGTH_SHORT).show();
         }
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateView(getView());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View inflatedView = inflater.inflate(R.layout.fragment_control, container, false);
-        connectButton = (ToggleButton) inflatedView.findViewById(R.id.connectButton);
-        frequencyButton = (Button) inflatedView.findViewById(R.id.changeFreqButton);
-        frequencyText = (EditText) inflatedView.findViewById(R.id.frequencyText);
-
-        connectButton.setOnTouchListener(new View.OnTouchListener()
-        {
-            @Override
-            public boolean onTouch(View v, MotionEvent event)
-            {
-                return changeConnectionStatus(event);
-            }
-        });
-        frequencyButton.setOnTouchListener(new View.OnTouchListener()
-        {
-            @Override
-            public boolean onTouch(View v, MotionEvent event)
-            {
-                return changeFrequency(event);
-            }
-        });
-        return inflatedView;
+        return inflater.inflate(R.layout.fragment_control, container, false);
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        FragmentActivity activity = getActivity();
-        CWPProvider cwpProvider = (CWPProvider)activity;
-        cwpControl = cwpProvider.getControl();
-        cwpControl.addObserver(this);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        cwpControl.deleteObserver(this);
-        cwpControl = null;
+        if (cwpControl != null) {
+            cwpControl.deleteObserver(this);
+            cwpControl = null;
+        }
     }
 
     private boolean changeConnectionStatus(MotionEvent event) {
-        if (!cwpControl.isConnected() && event.getAction() == MotionEvent.ACTION_DOWN) {
+        if (cwpControl != null && !cwpControl.isConnected() && event.getAction() == MotionEvent.ACTION_DOWN) {
             try {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
                 String[] addressAndPort = prefs.getString("server_address", "").split(":");
@@ -117,7 +126,7 @@ public class ControlFragment extends Fragment implements Observer {
                 ie.printStackTrace();
             }
         }
-        else if (cwpControl.isConnected() && event.getAction() == MotionEvent.ACTION_DOWN)
+        else if (cwpControl != null && cwpControl.isConnected() && event.getAction() == MotionEvent.ACTION_DOWN)
             try {
                 cwpControl.disconnect();
             } catch (IOException ie) {
@@ -127,7 +136,7 @@ public class ControlFragment extends Fragment implements Observer {
     }
 
     private boolean changeFrequency(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+        if (cwpControl != null && event.getAction() == MotionEvent.ACTION_DOWN) {
             int new_frequency = Integer.parseInt(frequencyText.getText().toString());
             if (new_frequency != cwpControl.getFrequency()) {
                 try {

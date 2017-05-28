@@ -30,8 +30,14 @@ public class TappingFragment extends Fragment implements Observer {
         // Required empty public constructor
     }
 
+    public void setMessaging (CWPMessaging messaging) {
+        cwpMessaging = messaging;
+        cwpMessaging.addObserver(this);
+    }
+
     @Override
     public void update(Observable o, Object arg) {
+        Log.d("Tapping", arg.toString());
         if (arg == CWProtocolListener.CWPEvent.ELineUp) // TODO: fix this. use Message class instead
             statusIndicator.setImageResource(R.drawable.receiving);
         else if (arg == CWProtocolListener.CWPEvent.ELineDown || arg == CWProtocolListener.CWPEvent.EConnected)
@@ -49,34 +55,40 @@ public class TappingFragment extends Fragment implements Observer {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View inflatedView = inflater.inflate(R.layout.fragment_tapping, container, false);
-        statusIndicator = (ImageButton)inflatedView.findViewById(R.id.statusIndicator);
-
-        statusIndicator.setOnTouchListener(new View.OnTouchListener()
-        {
-            @Override
-            public boolean onTouch(View v, MotionEvent event)
-            {
-                return changeMessagingStatus(event);
-            }
-        });
-        return inflatedView;
+        return inflater.inflate(R.layout.fragment_tapping, container, false);
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        FragmentActivity activity = getActivity();
-        CWPProvider cwpProvider = (CWPProvider)activity;
-        cwpMessaging = cwpProvider.getMessaging();
-        cwpMessaging.addObserver(this);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        cwpMessaging.deleteObserver(this);
-        cwpMessaging = null;
+        if (cwpMessaging != null) {
+            cwpMessaging.deleteObserver(this);
+            cwpMessaging = null;
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        View view = getView();
+        statusIndicator = (ImageButton) view.findViewById(R.id.statusIndicator);
+        if (view != null && cwpMessaging != null) {
+            if (cwpMessaging.isConnected() && !cwpMessaging.lineIsUp())
+                statusIndicator.setImageResource(R.drawable.idle);
+            if (cwpMessaging.lineIsUp())
+                statusIndicator.setImageResource(R.drawable.receiving);
+            statusIndicator.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return changeMessagingStatus(event);
+                }
+            });
+        }
     }
 
     private boolean changeMessagingStatus(MotionEvent event) {
