@@ -12,7 +12,6 @@ public interface CWPControl {
     public void connect(String serverAddr, int serverPort, int frequency) throws IOException;
     public void disconnect()  throws IOException;
     public boolean isConnected();
-    // Channel management
     public void setFrequency(int frequency) throws IOException;
     public int getFrequency();
 }

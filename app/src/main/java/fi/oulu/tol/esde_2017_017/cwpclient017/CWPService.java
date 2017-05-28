@@ -72,13 +72,13 @@ public class CWPService extends Service implements CWPProvider, Observer {
             cwpModel.disconnect();
             cwpModel = null;
         } catch (IOException e) {
-            e.printStackTrace(); //TODO: handle exception properly
+            e.printStackTrace();
         }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        //super.onBind(intent); //FIXME ?
+        //super.onBind(intent);
         return cwpBinder;
     }
 

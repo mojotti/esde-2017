@@ -38,7 +38,7 @@ public class TappingFragment extends Fragment implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         Log.d("Tapping", arg.toString());
-        if (arg == CWProtocolListener.CWPEvent.ELineUp) // TODO: fix this. use Message class instead
+        if (arg == CWProtocolListener.CWPEvent.ELineUp)
             statusIndicator.setImageResource(R.drawable.receiving);
         else if (arg == CWProtocolListener.CWPEvent.ELineDown || arg == CWProtocolListener.CWPEvent.EConnected)
             statusIndicator.setImageResource(R.drawable.idle);

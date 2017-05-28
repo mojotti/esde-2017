@@ -298,13 +298,12 @@ public class CWProtocolImplementation implements CWPControl, CWPMessaging, Runna
                 ByteBuffer buffer = ByteBuffer.allocate(BUFFER_LENGTH);
                 buffer.order(ByteOrder.BIG_ENDIAN);
                 while(isRunning) {
-                    handleIncomingMessages(bytes, buffer);  // todo: Figure out why this loops only once. Same issue appeared before refactoring.
-                    Log.d(TAG, "IS RUNNING");
+                    handleIncomingMessages(bytes, buffer);
                 }
             } catch (IOException e) {
-                Log.d(TAG, "IO Exception received. Exception: " + e.toString());  // todo: add exception handling.
+                Log.d(TAG, "IO Exception received. Exception: " + e.toString());
             } catch (InterruptedException e) {
-                Log.d(TAG, "Interrupted Exception received: " + e.toString());  // todo: add exception handling.
+                Log.d(TAG, "Interrupted Exception received: " + e.toString());
             }
         }
 
@@ -320,7 +319,6 @@ public class CWProtocolImplementation implements CWPControl, CWPMessaging, Runna
                     changeProtocolState(CWPState.LineDown, serverMessageInt);
                 }
             }
-            Log.d(TAG, "Incoming msg handled. Frequency: " + frequency);
         }
 
         private void receiveLineUpFromServer(byte[] bytes, ByteBuffer buffer, int serverMessageInt) throws InterruptedException, IOException {
@@ -332,7 +330,6 @@ public class CWProtocolImplementation implements CWPControl, CWPMessaging, Runna
                 short serverMessageShort = buffer.getShort();
                 changeProtocolState(CWPState.LineDown, serverMessageShort);
             }
-            Log.d(TAG, "line up from server received");
         }
 
         private void clearAndPutBytesToBuffer(int bytesRead, byte[] bytes, ByteBuffer buffer) {
