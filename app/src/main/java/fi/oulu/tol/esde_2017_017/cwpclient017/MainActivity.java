@@ -9,7 +9,6 @@ import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -46,18 +45,14 @@ public class MainActivity extends AppCompatActivity implements CWPProvider {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //FIXME?
+        // Fix weird android.os.NetworkOnMainThreadException, which occurs some times (reason unknown)
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
 
         Intent serviceIntent = new Intent(this, CWPService.class);
-        ComponentName startServiceRespoonse = startService(serviceIntent);
-        //if (startServiceRespoonse.) { //FIXME check if service started
-
-        //}
-
+        startService(serviceIntent);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

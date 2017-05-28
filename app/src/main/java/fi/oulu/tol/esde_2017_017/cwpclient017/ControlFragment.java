@@ -50,11 +50,14 @@ public class ControlFragment extends Fragment implements Observer {
     }
 
     public void updateView(View view) {
-        if (view != null && cwpControl != null) {
+        if (view != null) {
             connectButton = (ToggleButton) view.findViewById(R.id.connectButton);
-            connectButton.setChecked(cwpControl.isConnected());
+            if (cwpControl != null)
+                connectButton.setChecked(cwpControl.isConnected());
+
             frequencyButton = (Button) view.findViewById(R.id.changeFreqButton);
             frequencyText = (EditText) view.findViewById(R.id.frequencyText);
+
             connectButton.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
@@ -67,6 +70,7 @@ public class ControlFragment extends Fragment implements Observer {
                     return changeFrequency(event);
                 }
             });
+
             SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
             currentFrequency = (shared.getString("frequency", ""));
             frequencyText.setText(currentFrequency);

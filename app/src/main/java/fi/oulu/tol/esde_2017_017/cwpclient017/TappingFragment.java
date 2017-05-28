@@ -76,12 +76,14 @@ public class TappingFragment extends Fragment implements Observer {
     public void onStart() {
         super.onStart();
         View view = getView();
-        statusIndicator = (ImageButton) view.findViewById(R.id.statusIndicator);
-        if (view != null && cwpMessaging != null) {
-            if (cwpMessaging.isConnected() && !cwpMessaging.lineIsUp())
-                statusIndicator.setImageResource(R.drawable.idle);
-            if (cwpMessaging.lineIsUp())
-                statusIndicator.setImageResource(R.drawable.receiving);
+        if (view != null) {
+            statusIndicator = (ImageButton) view.findViewById(R.id.statusIndicator);
+            if (cwpMessaging != null) {
+                if (cwpMessaging.isConnected() && !cwpMessaging.lineIsUp())
+                    statusIndicator.setImageResource(R.drawable.idle);
+                if (cwpMessaging.lineIsUp())
+                    statusIndicator.setImageResource(R.drawable.receiving);
+            }
             statusIndicator.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
